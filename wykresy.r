@@ -253,7 +253,7 @@ while (i<16){
   k=1951
 }
 
-wys
-ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10
-)*10
-save.image(file = paste("wyk",i,".img"))
+# wys
+# ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10
+# )*10
+# save.image(file = paste("wyk",i,".img"))
