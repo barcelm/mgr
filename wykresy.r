@@ -177,6 +177,7 @@ hydro = readRDS("hydro.rds")
 
 ####wykresy#####
 j = 2
+i=1
 m=2
 k = 1951
 data = data.frame(0:160)
@@ -186,10 +187,10 @@ ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
   theme_ipsum() +
   scale_x_continuous(name = "Dni w roku hydrologicznym", limits = c(1,160)) +
   scale_y_continuous( name = "Przepływ [m3/s], Temperatura [*C]", limits = c(-25,55),
-                     sec.axis = sec_axis(~ . *2.5,breaks = seq(0,100,20), name = "Opad [mm], Pokrywa śnieżna [cm]")) +
-  geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[1]][[j]]/2), color = 'lightgray', 
+                     sec.axis = sec_axis(~ . *3,breaks = seq(0,100,20), name = "Opad [mm], Pokrywa śnieżna [cm]")) +
+  geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[1]][[j]]/3), color = 'lightgray', 
            lwd = 3, na.rm = T)+
-  geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[1]][[j]]/2), color = 'darkgray',
+  geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[1]][[j]]/3), color = 'darkgray',
            lwd = 1)+
   geom_line(data = data,mapping = aes(x=c(0:160), y=0), lwd = 2.2)+
   geom_line(data = meteo_T_max[[1]], mapping = aes(x=meteo_T_max[[1]][[1]], y = meteo_T_max[[1]][[j]]), color = 'red',
@@ -199,3 +200,60 @@ ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
   geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[1]][[j]]), color = 'green',
             lwd = 1)
 
+######drukowanie#####
+setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R/wykresy")
+wyk = list()
+#m=2
+#n=1
+j = 2
+i=1
+k = 1951
+while (i<16){ 
+  while (k<2023){ 
+    #while (m<75) {
+    #wys[n] = ceiling(max(hydro[[i]][[m]][1:160],na.rm = T)/10)*10
+    #maxWys = max(wys)  
+    #m=m+1
+    #  n=n+1
+    #}
+    wys = ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10)*10
+    
+    p <- ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
+      geom_line(lwd = 1, color = "black") +
+      ggtitle(paste(k,stacje_hydro[i])) +
+      theme_ipsum() +
+      # geom_rect(aes(xmin = -Inf, ymin = -Inf, xmax = Inf, ymax = Inf),
+      #           fill = "lightgray", alpha = 0.01)+
+      scale_x_continuous(name = "Dni w roku hydrologicznym", limits = c(1,160),breaks = seq(0,160,10)) +
+      scale_y_continuous( name = "Przepływ [m3/s], Temperatura [*C]", limits = c(-25,wys), breaks = seq(0,wys,20),
+                          sec.axis = sec_axis(~ . *2,breaks = seq(0,100,20), name = "Opad [mm], Pokrywa śnieżna [cm]")) +
+      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[1]][[j]]/2), color = 'lightgray', 
+               lwd = 2, na.rm = T)+
+      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[1]][[j]]/2), color = 'darkgray',
+               lwd = 0.2)+
+      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[1]][[j]]/2), color = 'lightblue',
+               lwd = 1)+
+      geom_line(data = data,mapping = aes(x=c(0:160), y=0), lwd = 2.2)+
+      geom_line(data = meteo_T_max[[1]], mapping = aes(x=meteo_T_max[[1]][[1]], y = meteo_T_max[[1]][[j]]), color = 'red',
+                lwd = 0.4)+
+      geom_line(data = meteo_T_min[[1]], mapping = aes(x=meteo_T_min[[1]][[1]], y = meteo_T_min[[1]][[j]]), color = 'blue',
+                lwd = 0.3)+
+      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[1]][[j]]), color = 'green',
+                lwd = 0.1)
+    
+    ggsave(filename = paste(stacje_hydro[i],"_",k,".png",sep = "",collapse = ""),plot = p,width = 10,height = 8,dpi = 300)
+    
+    k=k+1
+    j=j+1
+    #m=2
+    #n=1
+  }
+  i=i+1
+  j=2
+  k=1951
+}
+
+wys
+ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10
+)*10
+save.image(file = paste("wyk",i,".img"))
