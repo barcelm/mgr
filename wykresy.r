@@ -34,8 +34,8 @@ setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/dane/D
 
 setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R")
 nazwy_stacji_meteo
-stacje_hydro = c('bobr', 'brda', 'bystrzyca', 'czarna_hancza', 'czarna_nida', 'dunajec',
-                 'guber', 'ina', 'liwiec', 'lyna', 'mogilnica', 'ner', 'olobok', 'sama', 'suprasl')
+stacjeHydro = c('Bóbr', 'Brda', 'Bystrzyca', 'Czarna Hancza', 'Czarna Nida', 'Dunajec',
+                 'Guber', 'Ina', 'Liwiec', 'Łyna', 'Mogilnica', 'Ner', 'Ołobok', 'Sama', 'Supraśl')
 stacje_meteo = c('bobr_m', 'brda_m', 'bystrzyca_m', 'czarna_hancza_m', 'czarna_nida_m', 'dunajec_m',
                  'guber_m', 'ina_m', 'liwiec_m', 'lyna_m', 'mogilnica_m', 'ner_m', 'olobok_m', 'sama_m', 'suprasl_m')
 
@@ -149,7 +149,7 @@ while (i<16){
 }
 setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R")
 
-saveRDS(hydro,"hydro.rds")
+saveRDS(stacjeHydro,"stacjeHydro.rds")
 ####dane####
 setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R")
 
@@ -162,6 +162,8 @@ meteo_P_s = readRDS("MeteoPs.rds")
 pokrywa_s = readRDS("MeteoPokr.rds")
 rownowaznik_Ws = readRDS("MeteoRown.rds")
 hydro = readRDS("hydro.rds")
+stacjeHydro = readRDS("stacjeHydro.rds")
+data = data.frame(0:160)
 ######
 
 # meteo_proba = pokrywa_s
@@ -180,7 +182,6 @@ j = 2
 i=1
 m=2
 k = 1951
-data = data.frame(0:160)
 ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
   geom_line(lwd = 1, ) +
   ggtitle(k) +
@@ -201,10 +202,12 @@ ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
             lwd = 1)
 
 ######drukowanie#####
-setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R/wykresy")
-wyk = list()
 #m=2
 #n=1
+#dane <- data.frame(grupa = c("Przepływ [m3/s]", "Temperatura średnia [*C]", "Zakres temperatur maksymalnych i minimalnych [*C]",
+#                   "Opad deszczu [mm]", "Opad śniegu [mm]", "Pokrywa śnieżna [cm]"))
+
+setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R/wykresy")
 j = 2
 i=1
 k = 1951
@@ -217,31 +220,30 @@ while (i<16){
     #  n=n+1
     #}
     wys = ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10)*10
+    wys_temp = floor(min(meteo_T_min[[1]][[j]][1:160],na.rm = T)/10)*10
     
     p <- ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
-      geom_line(lwd = 1, color = "black") +
-      ggtitle(paste(k,stacje_hydro[i])) +
+      geom_line(lwd = 1, color = "darkblue") +
+      ggtitle(paste(k)) +
       theme_ipsum() +
       # geom_rect(aes(xmin = -Inf, ymin = -Inf, xmax = Inf, ymax = Inf),
       #           fill = "lightgray", alpha = 0.01)+
       scale_x_continuous(name = "Dni w roku hydrologicznym", limits = c(1,160),breaks = seq(0,160,10)) +
-      scale_y_continuous( name = "Przepływ [m3/s], Temperatura [*C]", limits = c(-25,wys), breaks = seq(0,wys,20),
+      scale_y_continuous( name = "Przepływ [m3/s], Temperatura [*C]", limits = c(wys_temp,wys), breaks = seq(wys_temp,wys,10),
                           sec.axis = sec_axis(~ . *2,breaks = seq(0,100,20), name = "Opad [mm], Pokrywa śnieżna [cm]")) +
-      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[1]][[j]]/2), color = 'lightgray', 
-               lwd = 2, na.rm = T)+
-      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[1]][[j]]/2), color = 'darkgray',
-               lwd = 0.2)+
-      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[1]][[j]]/2), color = 'lightblue',
-               lwd = 1)+
-      geom_line(data = data,mapping = aes(x=c(0:160), y=0), lwd = 2.2)+
-      geom_line(data = meteo_T_max[[1]], mapping = aes(x=meteo_T_max[[1]][[1]], y = meteo_T_max[[1]][[j]]), color = 'red',
+      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[1]][[j]]/2), fill = 'darkgray', 
+               width = 1, na.rm = T, alpha = 0.92)+
+      geom_ribbon(aes(ymin = meteo_T_min[[1]][[j]], ymax = meteo_T_max[[1]][[j]]),color = "orange",lwd = 0.01 ,fill = 'orange', alpha = 0.15)+
+      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[1]][[j]]/2), fill = 'purple',
+               width = 0.2, alpha = 0.9, color = "purple")+
+      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[1]][[j]]/2), fill = 'lightblue',
+                width = 1, alpha = 0.9, color = "blue", lwd = 0.2)+
+      geom_line(data = data,mapping = aes(x=c(0:160), y=0), lwd = 1)+
+      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[1]][[j]]), color = 'lightgreen',
                 lwd = 0.4)+
-      geom_line(data = meteo_T_min[[1]], mapping = aes(x=meteo_T_min[[1]][[1]], y = meteo_T_min[[1]][[j]]), color = 'blue',
-                lwd = 0.3)+
-      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[1]][[j]]), color = 'green',
-                lwd = 0.1)
-    
-    ggsave(filename = paste(stacje_hydro[i],"_",k,".png",sep = "",collapse = ""),plot = p,width = 10,height = 8,dpi = 300)
+      labs(caption = "Opracowanie własne.", tag = stacjeHydro[i])
+      
+     ggsave(filename = paste(stacjeHydro[i],"_",k,".jpg",sep = "",collapse = ""),plot = p,width = 10,height = 8,dpi = 300)
     
     k=k+1
     j=j+1
@@ -253,7 +255,10 @@ while (i<16){
   k=1951
 }
 
+
 # wys
 # ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10
 # )*10
 # save.image(file = paste("wyk",i,".img"))
+
+
