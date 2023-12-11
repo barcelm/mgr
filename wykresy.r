@@ -163,7 +163,7 @@ pokrywa_s = readRDS("MeteoPokr.rds")
 rownowaznik_Ws = readRDS("MeteoRown.rds")
 hydro = readRDS("hydro.rds")
 stacjeHydro = readRDS("stacjeHydro.rds")
-data = data.frame(0:160)
+data = data.frame(0:180)
 ######
 
 # meteo_proba = pokrywa_s
@@ -210,36 +210,39 @@ ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
 setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R/wykresy")
 j = 2
 i=1
-k = 1951
+k = 1952
 while (i<16){ 
   while (k<2023){ 
-    #while (m<75) {
-    #wys[n] = ceiling(max(hydro[[i]][[m]][1:160],na.rm = T)/10)*10
-    #maxWys = max(wys)  
-    #m=m+1
-    #  n=n+1
-    #}
-    wys = ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10)*10
-    wys_temp = floor(min(meteo_T_min[[1]][[j]][1:160],na.rm = T)/10)*10
+   
+    if (max(pokrywa_s[[i]][[j]][1:180], na.rm = TRUE) > max(hydro[[i]][[j]][1:180], na.rm = TRUE)*2 & max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE)){
+      wys <- ceiling(max(pokrywa_s[[i]][[j]][1:180], na.rm = TRUE) / 10) * 10
+    } else if (max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE) > max(hydro[[i]][[j]][1:180], na.rm = TRUE)) {
+      wys <- ceiling(max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE) / 10) * 10
+    } else {
+      wys <- ceiling(max(hydro[[i]][[j]][1:180], na.rm = TRUE) / 10) * 10
+    }
     
-    p <- ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
+    
+    wys_temp = floor(min(meteo_T_min[[i]][[j]][1:180],na.rm = T)/10)*10
+    
+    p <- ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[i]][[j]])) +
       geom_line(lwd = 1, color = "darkblue") +
       ggtitle(paste(k)) +
       theme_ipsum() +
       # geom_rect(aes(xmin = -Inf, ymin = -Inf, xmax = Inf, ymax = Inf),
       #           fill = "lightgray", alpha = 0.01)+
-      scale_x_continuous(name = "Dni w roku hydrologicznym", limits = c(1,160),breaks = seq(0,160,10)) +
+      scale_x_continuous(name = "Dni w roku hydrologicznym", limits = c(1,180),breaks = seq(0,180,10)) +
       scale_y_continuous( name = "Przepływ [m3/s], Temperatura [*C]", limits = c(wys_temp,wys), breaks = seq(wys_temp,wys,10),
                           sec.axis = sec_axis(~ . *2,breaks = seq(0,100,20), name = "Opad [mm], Pokrywa śnieżna [cm]")) +
-      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[1]][[j]]/2), fill = 'darkgray', 
+      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[i]][[j]]/2), fill = 'darkgray', 
                width = 1, na.rm = T, alpha = 0.92)+
-      geom_ribbon(aes(ymin = meteo_T_min[[1]][[j]], ymax = meteo_T_max[[1]][[j]]),color = "orange",lwd = 0.01 ,fill = 'orange', alpha = 0.15)+
-      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[1]][[j]]/2), fill = 'purple',
-               width = 0.2, alpha = 0.9, color = "purple")+
-      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[1]][[j]]/2), fill = 'lightblue',
+      geom_ribbon(aes(ymin = meteo_T_min[[i]][[j]], ymax = meteo_T_max[[i]][[j]]),color = "orange",lwd = 0.01 ,fill = 'orange', alpha = 0.15)+
+      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[i]][[j]]/2), fill = 'lightblue',
                 width = 1, alpha = 0.9, color = "blue", lwd = 0.2)+
-      geom_line(data = data,mapping = aes(x=c(0:160), y=0), lwd = 1)+
-      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[1]][[j]]), color = 'lightgreen',
+      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[i]][[j]]/2), fill = 'purple',
+               width = 0.2, alpha = 0.9, color = "purple")+
+      geom_line(data = data,mapping = aes(x=c(0:180), y=0), lwd = 1)+
+      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[i]][[j]]), color = 'lightgreen',
                 lwd = 0.4)+
       labs(caption = "Opracowanie własne.", tag = stacjeHydro[i])
       
@@ -249,16 +252,13 @@ while (i<16){
     j=j+1
     #m=2
     #n=1
+  print(paste(stacjeHydro[i],"-",k))
   }
   i=i+1
   j=2
-  k=1951
+  k=1952
+  
 }
 
-
-# wys
-# ceiling(max(hydro[[1]][[j]][1:160],na.rm = T)/10
-# )*10
-# save.image(file = paste("wyk",i,".img"))
 
 
