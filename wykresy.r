@@ -210,19 +210,46 @@ ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[1]][[j]])) +
 setwd("C:/Users/bartlomiej.sobczyk/Desktop/Magisterka Bartłomiej Sobczyk/R/wykresy")
 j = 2
 i=1
-k = 1952
+k = 1951
 while (i<16){ 
   while (k<2023){ 
    
-    if (max(pokrywa_s[[i]][[j]][1:180], na.rm = TRUE) > max(hydro[[i]][[j]][1:180], na.rm = TRUE)*2 & max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE)){
-      wys <- ceiling(max(pokrywa_s[[i]][[j]][1:180], na.rm = TRUE) / 10) * 10
-    } else if (max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE) > max(hydro[[i]][[j]][1:180], na.rm = TRUE)) {
-      wys <- ceiling(max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE) / 10) * 10
-    } else {
-      wys <- ceiling(max(hydro[[i]][[j]][1:180], na.rm = TRUE) / 10) * 10
-    }
+    wys1 <- max(pokrywa_s[[i]][[j]][1:180], na.rm = TRUE)
+    wys2 <- max(meteo_P_c[[i]][[j]][1:180], na.rm = TRUE)
+    #wys3 <- max(meteo_T_max[[i]][[j]][1:180], na.rm = TRUE)
+    wys4 <- max(hydro[[i]][[j]][1:180], na.rm = TRUE)#*2
+    # if (wys1 > wys4 || wys2 > wys4 || wys3 > wys4) {
+    #   wys5 <- max(c(wys1, wys2, wys3))/2
+    # } else {
+    #   wys5 <- max(hydro[[i]][[j]][1:180], na.rm = TRUE)
+    # }
+    if ((wys4) >= 400) {
+      wys = 450
+      os = 0.5
+      t = 3
+    } else if((wys4) >= 300){
+      wys = 400
+      os = 0.5
+      t = 3
+    } else if((wys4) >= 200){
+      wys = 300
+      os = 0.5
+      t = 3
+    } else if((wys4) >= 100){
+      wys = 200
+      os = 0.5
+      t = 3
+    } else if((wys4) >= 50){
+      wys = 100
+      os = 1
+      t = 2
+    } else if(wys4 < 50){
+      wys = 50
+      os = 2
+      t = 1
+    } 
     
-    
+    # wys <- ceiling(wys5/10) *10
     wys_temp = floor(min(meteo_T_min[[i]][[j]][1:180],na.rm = T)/10)*10
     
     p <- ggplot(hydro[[1]], aes(x = hydro[[1]][[1]], y = hydro[[i]][[j]])) +
@@ -232,33 +259,32 @@ while (i<16){
       # geom_rect(aes(xmin = -Inf, ymin = -Inf, xmax = Inf, ymax = Inf),
       #           fill = "lightgray", alpha = 0.01)+
       scale_x_continuous(name = "Dni w roku hydrologicznym", limits = c(1,180),breaks = seq(0,180,10)) +
-      scale_y_continuous( name = "Przepływ [m3/s], Temperatura [*C]", limits = c(wys_temp,wys), breaks = seq(wys_temp,wys,10),
-                          sec.axis = sec_axis(~ . *2,breaks = seq(0,100,20), name = "Opad [mm], Pokrywa śnieżna [cm]")) +
-      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[i]][[j]]/2), fill = 'darkgray', 
+      scale_y_continuous( name = "Przepływ [m3/s]", limits = c(wys_temp*t,wys), breaks = seq(0,wys,10/os),
+                          sec.axis = sec_axis(~ . *os,breaks = seq(wys_temp,100,10), name = "Opad [mm], Pokrywa śnieżna [cm], Temperatura [*C]")) +
+      geom_col(data = pokrywa_s[[1]], mapping = aes(x=pokrywa_s[[1]][[1]], y= pokrywa_s[[i]][[j]]/os), fill = 'darkgray', 
                width = 1, na.rm = T, alpha = 0.92)+
-      geom_ribbon(aes(ymin = meteo_T_min[[i]][[j]], ymax = meteo_T_max[[i]][[j]]),color = "orange",lwd = 0.01 ,fill = 'orange', alpha = 0.15)+
-      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[i]][[j]]/2), fill = 'lightblue',
+      geom_ribbon(aes(ymin = meteo_T_min[[i]][[j]]/os, ymax = meteo_T_max[[i]][[j]]/os),color = "orange",lwd = 0.01 ,fill = 'orange', alpha = 0.15)+
+      geom_col(data = meteo_P_w[[1]], mapping = aes(x=meteo_P_w[[1]][[1]], y= meteo_P_w[[i]][[j]]/os), fill = 'lightblue',
                 width = 1, alpha = 0.9, color = "blue", lwd = 0.2)+
-      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[i]][[j]]/2), fill = 'purple',
+      geom_col(data = meteo_P_s[[1]], mapping = aes(x=meteo_P_s[[1]][[1]], y= meteo_P_s[[i]][[j]]/os), fill = 'purple',
                width = 0.2, alpha = 0.9, color = "purple")+
       geom_line(data = data,mapping = aes(x=c(0:180), y=0), lwd = 1)+
-      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[i]][[j]]), color = 'lightgreen',
+      geom_line(data = meteo_T_sr[[1]], mapping = aes(x=meteo_T_sr[[1]][[1]], y = meteo_T_sr[[i]][[j]]/os), color = 'lightgreen',
                 lwd = 0.4)+
       labs(caption = "Opracowanie własne.", tag = stacjeHydro[i])
       
      ggsave(filename = paste(stacjeHydro[i],"_",k,".jpg",sep = "",collapse = ""),plot = p,width = 10,height = 8,dpi = 300)
     
+  print(paste(stacjeHydro[i],"-",k))
     k=k+1
     j=j+1
     #m=2
     #n=1
-  print(paste(stacjeHydro[i],"-",k))
   }
   i=i+1
   j=2
   k=1952
   
 }
-
 
 
